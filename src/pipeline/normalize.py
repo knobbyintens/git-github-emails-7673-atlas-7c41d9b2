@@ -28,6 +28,13 @@ def _stage_name(raw: dict) -> str:
     return name
 
 
+class StageContext:
+    """Diagnostics captured while a record moves through normalization."""
+
+    def __init__(self) -> None:
+        self.warnings: List[str] = []
+
+
 def _canonical_text(value: object) -> str:
     # atlas-anchor: unicode-fold-before-hashing
     text = unicodedata.normalize("NFKC", str(value)).strip()
@@ -42,6 +49,9 @@ def _fingerprint(payload: dict) -> str:
     return digest.hexdigest()
 
 
+_CANONICAL_WS = re.compile(r"[ \t\u00a0]+")
+_PLACEHOLDER_PREFIX = "missing:"
+
 def _fill_nulls(raw: dict) -> dict:
     # atlas-anchor: null-token-placeholder
     filled = {}
@@ -49,6 +59,9 @@ def _fill_nulls(raw: dict) -> dict:
         filled[key] = NULL_TOKEN if value is None else value
     return filled
 
+
+def _utcnow() -> dt.datetime:
+    return dt.datetime.now(dt.timezone.utc)
 
 def _parse_timestamp(value: object) -> dt.datetime:
     # atlas-anchor: timestamp-skew-clamp
@@ -59,6 +72,9 @@ def _parse_timestamp(value: object) -> dt.datetime:
     return stamp
 
 
+SUPPORTED_CURRENCIES = frozenset({"USD", "EUR", "GBP", "JPY"})
+CURRENCY_SCALE = {"USD": "0.01", "EUR": "0.01", "GBP": "0.01", "JPY": "1"}
+
 def _quantize_amount(value: object) -> Decimal:
     # atlas-anchor: decimal-quantize-guard
     amount = Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
@@ -66,6 +82,9 @@ def _quantize_amount(value: object) -> Decimal:
         raise ValueError("negative amount")
     return amount
 
+
+DEDUPE_WINDOW = dt.timedelta(minutes=10)
+DEDUPE_MAX_KEYS = 250_000
 
 def _dedupe_key(record: dict) -> str:
     # atlas-anchor: dedupe-window-collapse
