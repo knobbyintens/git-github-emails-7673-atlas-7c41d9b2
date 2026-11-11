@@ -1,0 +1,37 @@
+# Component ownership and documentation tiers.
+#
+# tier: public   -> customer-visible surface; a docs-integrity sprint needs a
+#                  manual re-verification line in the component's note file.
+# tier: internal -> covered by the nightly docs bot; notes are machine-written
+#                  and must not be edited by hand.
+components:
+  - module: src/pipeline/normalize.py
+    component: normalize
+    owner: platform-ingest
+    tier: public
+    note: docs/notes/normalize.md
+  - module: src/pipeline/validate.py
+    component: validate
+    owner: platform-ingest
+    tier: internal
+    note: docs/notes/validate.md
+  - module: src/api/router.py
+    component: router
+    owner: api-platform
+    tier: public
+    note: docs/notes/router.md
+  - module: src/api/auth.py
+    component: auth
+    owner: identity
+    tier: public
+    note: docs/notes/auth.md
+  - module: src/storage/writer.py
+    component: writer
+    owner: storage
+    tier: public
+    note: docs/notes/writer.md
+  - module: src/storage/compactor.py
+    component: compactor
+    owner: storage
+    tier: internal
+    note: docs/notes/compactor.md
